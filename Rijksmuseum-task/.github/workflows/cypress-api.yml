@@ -1,0 +1,39 @@
+name: Cypress Api tests 
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Create .env file
+        run: |
+          touch .env
+          echo "API_KEY=${{secrets.API_KEY}}" >> .env
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: Run cypress tests
+        run: npx cypress run --browser chrome
+
+      - name: Reporting
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: mochawesome-report
+          path: |
+            cypress/reports/mochawesome
